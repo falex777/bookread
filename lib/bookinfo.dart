@@ -75,7 +75,7 @@ class _BookInfoState extends State<BookInfo> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: Icon(Icons.delete, color: Colors.white70),
             onPressed: () => _deleteBook(book),
           ),
         ],
@@ -112,8 +112,7 @@ class _BookInfoState extends State<BookInfo> {
               child: Text(book.booktxt,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color.fromARGB(255, 211, 211, 211),
-                  
+                  color: Colors.black,
                 ), 
                 textAlign: TextAlign.justify
               ),
@@ -131,7 +130,7 @@ class _BookInfoState extends State<BookInfo> {
         currentIndex: 0,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey[300],
-        backgroundColor: Colors.black26,
+        backgroundColor: Colors.green[500],
         onTap: (index) {
           switch (index) {
             case 0:

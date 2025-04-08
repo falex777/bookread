@@ -110,12 +110,12 @@ class _BooksList extends State<BooksList> {
                       booktxt: bookTxtController.text,
                       img: imgController.text,
                     );
-                    await bookStore.addBook(newBook); // Отправка на сервер
+                    await bookStore.addBook(newBook);
                     Navigator.of(context).pop();
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Ошибка: введите корректную цену.')),
+                          content: Text('Ошибка')),
                     );
                   }
                 } else {
@@ -143,7 +143,7 @@ class _BooksList extends State<BooksList> {
         title: Text(widget.title),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: Icon(Icons.add, color: Colors.white),
             onPressed: () => _addBook(bookStore),
           ),
         ],
@@ -151,7 +151,7 @@ class _BooksList extends State<BooksList> {
       body: ListView.separated(
         itemCount: bookStore.length,
         separatorBuilder: (context, index) =>
-            const Divider(color: Colors.white30),
+            const Divider(color: Colors.green),
         itemBuilder: (context, index) => ListTile(
           leading: Image.asset(
             'assets/img/${bookStore.list[index].img}',
@@ -159,9 +159,11 @@ class _BooksList extends State<BooksList> {
             height: 50,
           ),
           title: Text(bookStore.list[index].title,
-              style: theme.textTheme.bodyMedium),
+            style: TextStyle(color: Colors.black87)
+          ),
           subtitle: Text(bookStore.list[index].author,
-              style: theme.textTheme.labelSmall),
+            style: TextStyle(color: Colors.green[400])
+          ),
           trailing: Wrap(
             children: [              
               IconButton(
@@ -173,7 +175,7 @@ class _BooksList extends State<BooksList> {
                         : Icons.favorite_border,
                     color: bookStore.list[index].isFavorite
                         ? Colors.red
-                        : Colors.grey),
+                        : Colors.green[200]),
                 onPressed: () {
                   bookStore.toggleFavorite(bookStore.list[index].code);
                 },
@@ -181,7 +183,7 @@ class _BooksList extends State<BooksList> {
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
-                icon: Icon(Icons.delete, color: Colors.white),
+                icon: Icon(Icons.delete, color: Colors.green[200]),
                 onPressed: () => _deleteBook(bookStore, index),
               ),
             ],
@@ -191,7 +193,7 @@ class _BooksList extends State<BooksList> {
           },
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(        
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Книги'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Избранное'),
@@ -199,9 +201,9 @@ class _BooksList extends State<BooksList> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
         ],
         currentIndex: 0,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.grey[300],
-        backgroundColor: Colors.black26,
+        selectedItemColor: Colors.green[500],
+        unselectedItemColor: Colors.green[500],
+        backgroundColor: Colors.green[500],
         onTap: (index) {
           switch (index) {
             case 0:
