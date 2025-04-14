@@ -32,7 +32,7 @@ class _BookInfoState extends State<BookInfo> {
           content: Text('Вы уверены, что хотите удалить "${book.title}"?'),
           actions: [
             TextButton(
-              onPressed: () async {                
+              onPressed: () async {
                 final booksStore = Provider.of<BooksStore>(context);
                 booksStore.deleteBook(book.code);
                 Navigator.of(context).pop();
@@ -69,7 +69,9 @@ class _BookInfoState extends State<BookInfo> {
               booksStore.toggleFavorite(book.code);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(!book.isFavorite ? 'Книга добавлена в избранное' : 'Книга удалена из избранного'),
+                  content: Text(!book.isFavorite
+                      ? 'Книга добавлена в избранное'
+                      : 'Книга удалена из избранного'),
                 ),
               );
             },
@@ -81,9 +83,9 @@ class _BookInfoState extends State<BookInfo> {
         ],
       ),
       body: Center(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
+          child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -103,37 +105,35 @@ class _BookInfoState extends State<BookInfo> {
             Container(
               padding: EdgeInsets.only(left: 30, right: 30),
               child: Text(book.title,
-                style: theme.textTheme.labelLarge,
-                textAlign: TextAlign.center
-              ),
+                  style: theme.textTheme.labelLarge,
+                  textAlign: TextAlign.center),
             ),
             Container(
               padding: EdgeInsets.only(left: 30, right: 30),
               child: Text(book.booktxt,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black,
-                ), 
-                textAlign: TextAlign.justify
-              ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.justify),
             )
           ],
         ),
-        )
-      ),      
+      )),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.play_arrow), label: 'Воспроизвести'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.list), label: 'Оглавление'),
+              icon: Icon(Icons.play_arrow), label: 'Воспроизвести'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Оглавление'),
         ],
         currentIndex: 0,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey[300],
         backgroundColor: Colors.green[500],
-        onTap: (index) {
+        onTap: (index) async {
           switch (index) {
             case 0:
+              booksStore.playAudio();
               break;
             case 1:
               break;

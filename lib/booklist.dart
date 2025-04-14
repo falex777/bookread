@@ -136,7 +136,7 @@ class _BooksList extends State<BooksList> {
   @override
   Widget build(BuildContext context) {
     final bookStore = Provider.of<BooksStore>(context);
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
