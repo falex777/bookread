@@ -63,10 +63,10 @@ class BooksStore extends ChangeNotifier {
         List jsonResponse = json.decode(response.body);
         player.play(UrlSource(baseUrl + jsonResponse.toList()[0]));
       } else {
-        player.play(UrlSource('https://samplelib.com/lib/preview/mp3/sample-12s.mp3'));
+        player.play(AssetSource('demo.mp3'));
       }
     } catch (e) {
-      player.play(UrlSource('https://samplelib.com/lib/preview/mp3/sample-12s.mp3'));
+      player.play(AssetSource('demo.mp3'));
     }
     
     notifyListeners();
