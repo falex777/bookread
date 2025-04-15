@@ -133,7 +133,7 @@ class _BookInfoState extends State<BookInfo> {
         onTap: (index) async {
           switch (index) {
             case 0:
-              booksStore.playAudio();
+              booksStore.playAudio(book.booktxt);
               break;
             case 1:
               break;

@@ -1,6 +1,7 @@
 // repository.dart
 
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -10,7 +11,7 @@ final input =
 
 class BooksStore extends ChangeNotifier {
   final List<BookItem> _books = [];
-  final baseUrl = "http://localhost:8080/books/";
+  final baseUrl = "http://localhost:8080/";
 
   UserProfile _userProfile = UserProfile();
 
@@ -47,9 +48,27 @@ class BooksStore extends ChangeNotifier {
     }
   }
 
-  Future<void> playAudio() async {
+  Future<void> playAudio(String txt) async {
     final player = AudioPlayer();
-    player.play(UrlSource('https://samplelib.com/lib/preview/mp3/sample-12s.mp3'));
+    try {
+      final response = await http.post(
+        Uri.parse('${baseUrl}getaudio'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{'text': txt}),
+      );
+
+      if ((response.statusCode / 100 ).round() == 2) {
+        List jsonResponse = json.decode(response.body);
+        player.play(UrlSource(baseUrl + jsonResponse.toList()[0]));
+      } else {
+        player.play(UrlSource('https://samplelib.com/lib/preview/mp3/sample-12s.mp3'));
+      }
+    } catch (e) {
+      player.play(UrlSource('https://samplelib.com/lib/preview/mp3/sample-12s.mp3'));
+    }
+    
     notifyListeners();
   }
 
