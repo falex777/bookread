@@ -1,16 +1,57 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class BooksStore extends ChangeNotifier {
   final List<BookItem> _books = [];
   final baseUrl = "http://localhost:8080/";
   UserProfile _userProfile = UserProfile();
+  late String _localPath;
+  bool _isInitialized = false;
 
   List<BookItem> get list => _books;
   UserProfile get userProfile => _userProfile;
+
+  Future<void> _initializeLocalPath() async {
+    if (!_isInitialized) {
+      final directory = await getApplicationDocumentsDirectory();
+      _localPath = '${directory.path}/books.json';
+      _isInitialized = true;
+    }
+  }
+
+  Future<void> _saveToFile() async {
+    await _initializeLocalPath();
+    final file = File(_localPath);
+    final jsonList = _books.map((book) => book.toJson()).toList();
+    await file.writeAsString(jsonEncode(jsonList));
+  }
+
+  Future<void> _loadFromFile() async {
+    await _initializeLocalPath();
+    final file = File(_localPath);
+    
+    if (!await file.exists()) {
+      // Если файл не существует, копируем исходный JSON из assets
+      final String jsonString = await rootBundle.loadString('assets/data/books.json');
+      await file.writeAsString(jsonString);
+      return await _loadFromFile();
+    }
+
+    try {
+      final String jsonString = await file.readAsString();
+      List jsonResponse = jsonDecode(jsonString);
+      _books.clear();
+      _books.addAll(jsonResponse.map((book) => BookItem.fromJson(book)).toList());
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Ошибка загрузки книг: ${e.toString()}');
+    }
+  }
 
   int maxCode() {
     if (_books.isEmpty) return 0;
@@ -26,16 +67,37 @@ class BooksStore extends ChangeNotifier {
   int get length => _books.length;
 
   Future<void> fetchBooks() async {
-    _books.clear();
     try {
-      final String jsonString = await rootBundle.loadString('assets/data/books.json');
-      List jsonResponse = jsonDecode(jsonString);
-      List<BookItem> books = jsonResponse.map((book) => BookItem.fromJson(book)).toList();
-      _books.addAll(books);
-      notifyListeners();
+      await _loadFromFile();
     } catch (e) {
       throw Exception('Ошибка загрузки книг: ${e.toString()}');
     }
+  }
+
+  Future<void> addBook(BookItem newBook) async {
+    _books.insert(0, newBook);
+    await _saveToFile();
+    notifyListeners();
+  }
+
+  Future<void> updateBook(BookItem updBook) async {
+    int index = _books.indexWhere((item) => item.id == updBook.id);
+    if (index != -1) {
+      _books[index] = updBook;
+      await _saveToFile();
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteBook(int id) async {
+    _books.removeWhere((item) => item.id == id);
+    await _saveToFile();
+    notifyListeners();
+  }
+
+  Future<void> updateProfile(UserProfile profile) async {
+    _userProfile = profile;
+    notifyListeners();
   }
 
   Future<void> playAudio(String txt) async {
@@ -62,31 +124,6 @@ class BooksStore extends ChangeNotifier {
     } catch (e) {
       await player.play(AssetSource('demo.mp3'));
     }
-
-    notifyListeners();
-  }
-
-  Future<void> addBook(BookItem newBook) async {
-    _books.insert(0, newBook);
-    notifyListeners();
-  }
-
-  Future<void> updateBook(BookItem updBook) async {
-    int index = _books.indexWhere((item) => item.id == updBook.id);
-    if (index != -1) {
-      _books[index] = updBook;
-      notifyListeners();
-    }
-  }
-
-  Future<void> deleteBook(int id) async {
-    _books.removeWhere((item) => item.id == id);
-    notifyListeners();
-  }
-
-  Future<void> updateProfile(UserProfile profile) async {
-    _userProfile = profile;
-    notifyListeners();
   }
 }
 
