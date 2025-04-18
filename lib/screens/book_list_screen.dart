@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:books_reader/models/books.model.dart';
 import 'package:books_reader/widgets/book_card.dart';
+import 'package:books_reader/widgets/book_card_grid.dart';
 
 class BookListScreen extends StatefulWidget {
   const BookListScreen({super.key, required this.title});
@@ -12,6 +13,9 @@ class BookListScreen extends StatefulWidget {
 }
 
 class _BookListScreenState extends State<BookListScreen> {
+  final _searchController = TextEditingController();
+  bool _isGridView = false;
+
   @override
   void initState() {
     super.initState();
@@ -19,6 +23,11 @@ class _BookListScreenState extends State<BookListScreen> {
         () => Provider.of<BooksStore>(context, listen: false).fetchBooks());
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _actionBox(BooksStore bookStore, int index) {
     showDialog(
@@ -151,47 +160,131 @@ class _BookListScreenState extends State<BookListScreen> {
     final bookStore = Provider.of<BooksStore>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
-            onPressed: () => _addBook(bookStore),
-          ),
-        ],
-      ),
-      body: ListView.separated(
-        itemCount: bookStore.length,
-        separatorBuilder: (context, index) => const Divider(color: Colors.green),
-        itemBuilder: (context, index) => BookCard(
-          book: bookStore.list[index],
-          onAction: () => _deleteBook(bookStore, index),
-          onTap: () {
-            Navigator.of(context).pushNamed('/info', arguments: index);
-          },
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Поиск',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                          prefixIcon: Icon(Icons.search, color: Colors.black54),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.filter_alt_outlined),
+                      onPressed: () {},
+                      color: Colors.black54,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+                      onPressed: () {
+                        setState(() {
+                          _isGridView = !_isGridView;
+                        });
+                      },
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
+                  ),
+                ),
+                child: _isGridView
+                    ? GridView.builder(
+                        padding: EdgeInsets.all(16),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.75,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        itemCount: bookStore.length,
+                        itemBuilder: (context, index) => BookCardGrid(
+                          book: bookStore.list[index],
+                          onAction: () => _deleteBook(bookStore, index),
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushNamed('/info', arguments: index);
+                          },
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: EdgeInsets.only(top: 16),
+                        itemCount: bookStore.length,
+                        separatorBuilder: (context, index) => Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Divider(height: 1, color: Colors.black12),
+                        ),
+                        itemBuilder: (context, index) => BookCard(
+                          book: bookStore.list[index],
+                          onAction: () => _deleteBook(bookStore, index),
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushNamed('/info', arguments: index);
+                          },
+                        ),
+                      ),
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: Container(
-        height: 50.0,
-        width: 50.0,
-        child: FittedBox(
-          child: FloatingActionButton(
-            onPressed: () {
-              // Add your onPressed code here!
-            },
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.black,
-            shape: CircleBorder(
-              side: BorderSide(
-                width: 4,
-                color: Colors.black,
-              ),
+        width: 56,
+        height: 56,
+        child: FloatingActionButton(
+          onPressed: () => _addBook(bookStore),
+          backgroundColor: Colors.white,
+          elevation: 2,
+          shape: CircleBorder(
+            side: BorderSide(
+              width: 2,
+              color: Colors.black54,
             ),
-            elevation: 0,
-            child: Icon(Icons.add, size: 48),
           ),
+          child: Icon(Icons.add, color: Colors.black54, size: 32),
         ),
-      ),      
+      ),
     );
   }
 } 
