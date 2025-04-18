@@ -3,7 +3,7 @@ import 'package:books_reader/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:books_reader/screens/book_list_screen.dart';
 import 'package:books_reader/models/books.model.dart';
-import 'package:books_reader/screens/book_info_screen.dart';
+import 'package:books_reader/screens/book_text_screen.dart';
 import 'package:books_reader/screens/profile_screen.dart';
 
 void main() {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         theme: DarkTheme,
         routes: {
           '/': (context) => const BookListScreen(title: 'Каталог книг'),
-          '/info': (context) => const BookInfoScreen(title: 'Текст'),
+          '/info': (context) => const BookTextScreen(),
           '/profile': (context) => const ProfileScreen(),
         },
       )

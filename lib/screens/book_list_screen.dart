@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:books_reader/models/books.model.dart';
 import 'package:books_reader/widgets/book_card.dart';
 import 'package:books_reader/widgets/book_card_grid.dart';
+import 'package:books_reader/widgets/book_action_sheet.dart';
 
 class BookListScreen extends StatefulWidget {
   const BookListScreen({super.key, required this.title});
@@ -29,22 +30,99 @@ class _BookListScreenState extends State<BookListScreen> {
     super.dispose();
   }
 
-  void _actionBox(BooksStore bookStore, int index) {
+  void _showBookActions(BuildContext context, BooksStore bookStore, int index) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return BookActionSheet(
+          book: bookStore.list[index],
+          onShare: () {
+            // Implement share functionality
+            Navigator.pop(context);
+          },
+          onEdit: () {
+            Navigator.pop(context);
+            _editBook(bookStore, index);
+          },
+          onDelete: () {
+            Navigator.pop(context);
+            _deleteBook(bookStore, index);
+          },
+        );
+      },
+    );
+  }
+
+  void _editBook(BooksStore bookStore, int index) {
+    final book = bookStore.list[index];
+    final titleController = TextEditingController(text: book.title);
+    final authorController = TextEditingController(text: book.author);
+    final bookTxtController = TextEditingController(text: book.booktxt);
+    final imgController = TextEditingController(text: book.img);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Что делать с книгой?'),
-          content: const Text('Всяко разно'),
-          actions: <Widget>[
+          title: const Text('Редактировать книгу'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Название'),
+                ),
+                TextField(
+                  controller: authorController,
+                  decoration: const InputDecoration(labelText: 'Автор'),
+                ),
+                TextField(
+                  controller: bookTxtController,
+                  decoration: const InputDecoration(labelText: 'Текст'),
+                ),
+                TextField(
+                  controller: imgController,
+                  decoration: const InputDecoration(
+                      labelText: 'Изображение (имя файла)'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
             TextButton(
               child: const Text('Отмена'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
               child: const Text('Сохранить'),
-              onPressed: () {
-                Navigator.of(context).pop();
+              onPressed: () async {
+                if (titleController.text.isNotEmpty &&
+                    authorController.text.isNotEmpty &&
+                    imgController.text.isNotEmpty) {
+                  try {
+                    final updatedBook = BookItem(
+                      id: book.id,
+                      title: titleController.text,
+                      author: authorController.text,
+                      booktxt: bookTxtController.text,
+                      img: imgController.text,
+                      progress: book.progress,
+                      isFavorite: book.isFavorite,
+                    );
+                    await bookStore.updateBook(updatedBook);
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Ошибка при сохранении')),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Ошибка: все поля должны быть заполнены.')),
+                  );
+                }
               },
             ),
           ],
@@ -241,7 +319,7 @@ class _BookListScreenState extends State<BookListScreen> {
                         itemCount: bookStore.length,
                         itemBuilder: (context, index) => BookCardGrid(
                           book: bookStore.list[index],
-                          onAction: () => _deleteBook(bookStore, index),
+                          onAction: () => _showBookActions(context, bookStore, index),
                           onTap: () {
                             Navigator.of(context)
                                 .pushNamed('/info', arguments: index);
@@ -257,7 +335,7 @@ class _BookListScreenState extends State<BookListScreen> {
                         ),
                         itemBuilder: (context, index) => BookCard(
                           book: bookStore.list[index],
-                          onAction: () => _deleteBook(bookStore, index),
+                          onAction: () => _showBookActions(context, bookStore, index),
                           onTap: () {
                             Navigator.of(context)
                                 .pushNamed('/info', arguments: index);
