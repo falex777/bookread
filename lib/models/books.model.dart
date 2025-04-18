@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class BooksStore extends ChangeNotifier {
   final List<BookItem> _books = [];
   final baseUrl = "http://localhost:8080/";
   UserProfile _userProfile = UserProfile();
-  late String _localPath;
+  late SharedPreferences _prefs;
   bool _isInitialized = false;
 
   List<BookItem> get list => _books;
@@ -18,32 +18,29 @@ class BooksStore extends ChangeNotifier {
 
   Future<void> _initializeLocalPath() async {
     if (!_isInitialized) {
-      final directory = await getApplicationDocumentsDirectory();
-      _localPath = '${directory.path}/books.json';
+      _prefs = await SharedPreferences.getInstance();
       _isInitialized = true;
     }
   }
 
   Future<void> _saveToFile() async {
     await _initializeLocalPath();
-    final file = File(_localPath);
     final jsonList = _books.map((book) => book.toJson()).toList();
-    await file.writeAsString(jsonEncode(jsonList));
+    await _prefs.setString('books', jsonEncode(jsonList));
   }
 
   Future<void> _loadFromFile() async {
     await _initializeLocalPath();
-    final file = File(_localPath);
     
-    if (!await file.exists()) {
-      // Если файл не существует, копируем исходный JSON из assets
+    if (!_prefs.containsKey('books')) {
+      // If no data exists, load from assets
       final String jsonString = await rootBundle.loadString('assets/data/books.json');
-      await file.writeAsString(jsonString);
+      await _prefs.setString('books', jsonString);
       return await _loadFromFile();
     }
 
     try {
-      final String jsonString = await file.readAsString();
+      final String jsonString = _prefs.getString('books') ?? '[]';
       List jsonResponse = jsonDecode(jsonString);
       _books.clear();
       _books.addAll(jsonResponse.map((book) => BookItem.fromJson(book)).toList());
