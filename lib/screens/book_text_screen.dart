@@ -12,6 +12,7 @@ class BookTextScreen extends StatefulWidget {
 class _BookTextScreenState extends State<BookTextScreen> {
   int index = 0;
   bool _isSearching = false;
+  bool _isPlaying = false;
   final TextEditingController _searchController = TextEditingController();
   double _fontSize = 16.0;
   Color _backgroundColor = Color(0xFFF5F1E4); // Бежевый цвет фона из макета
@@ -139,6 +140,15 @@ class _BookTextScreenState extends State<BookTextScreen> {
     );
   }
 
+  void _togglePlay(BooksStore bookStore, BookItem book) async {
+    setState(() {
+      _isPlaying = !_isPlaying;
+    });
+    if (_isPlaying) {
+      await bookStore.playAudio(book.booktxt);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final booksStore = Provider.of<BooksStore>(context);
@@ -180,6 +190,55 @@ class _BookTextScreenState extends State<BookTextScreen> {
             height: 1.5,
           ),
           textAlign: TextAlign.justify,
+        ),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(0, -1),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _togglePlay(booksStore, book),
+                  icon: Icon(
+                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.green,
+                  ),
+                  label: Text(
+                    'Начать озвучивать',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+                Container(
+                  height: 24,
+                  width: 1,
+                  color: Colors.black12,
+                ),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.list,
+                    color: Colors.black54,
+                  ),
+                  label: Text(
+                    'Оглавление',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
