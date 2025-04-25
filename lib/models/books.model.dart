@@ -87,6 +87,22 @@ class BooksStore extends ChangeNotifier {
   }
 
   Future<void> deleteBook(int id) async {
+    // Находим книгу перед удалением, чтобы получить путь к файлу
+    final bookToDelete = _books.firstWhere((item) => item.id == id, orElse: () => BookItem(id: -1, title: '', author: ''));
+    
+    // Если книга найдена и у неё есть путь к файлу, удаляем файл
+    if (bookToDelete.id != -1 && bookToDelete.bookFilePath.isNotEmpty) {
+      final bookFile = File(bookToDelete.bookFilePath);
+      if (await bookFile.exists()) {
+        try {
+          await bookFile.delete();
+        } catch (e) {
+          print('Ошибка при удалении файла книги: ${e.toString()}');
+        }
+      }
+    }
+    
+    // Удаляем книгу из списка
     _books.removeWhere((item) => item.id == id);
     await _saveToFile();
     notifyListeners();
@@ -130,6 +146,7 @@ class BookItem {
   final String author;
   final String booktxt;
   final String img;
+  final String bookFilePath; // Путь к сохраненному файлу книги
   final int progress;
   bool isFavorite;
 
@@ -139,6 +156,7 @@ class BookItem {
     required this.author,
     this.booktxt = '',
     this.img = '',
+    this.bookFilePath = '', // Инициализация пустой строкой по умолчанию
     this.progress = 0,
     this.isFavorite = false,
   });
@@ -150,6 +168,7 @@ class BookItem {
       author: json['author'] as String,
       booktxt: json['booktxt'] as String? ?? '',
       img: json['img'] as String? ?? '',
+      bookFilePath: json['book_file_path'] as String? ?? '',
       progress: json['progress'] as int? ?? 0,
       isFavorite: json['is_favorite'] as bool? ?? false,
     );
@@ -162,6 +181,7 @@ class BookItem {
       'author': author,
       'booktxt': booktxt,
       'img': img,
+      'book_file_path': bookFilePath,
       'progress': progress,
       'is_favorite': isFavorite,
     };
