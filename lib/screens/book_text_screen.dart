@@ -23,31 +23,41 @@ class _BookTextScreenState extends State<BookTextScreen> {
   Color _backgroundColor = Color(0xFFF5F1E4);
   Color _textColor = Colors.black87;
 
-  late EpubController _epubController;
+  EpubController? _epubController;
+  BookItem? _book;
 
   double get _fontSize => 16.0 * _fontSizePercent / 100;
   double get _lineHeight => _lineHeightPercent / 100;
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    _epubController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      assert(args != null && args is int, 'Error: arguments must be int');
+      index = args as int;
+      final booksStore = Provider.of<BooksStore>(context, listen: false);
+      _book = booksStore.list[index];
+      if (_book?.filePath != null && _book!.filePath!.isNotEmpty) {
+        setState(() {
+          _epubController = EpubController(
+            document: EpubDocument.openFile(File(_book!.filePath!)),
+          );
+        });
+      }
+    });
   }
 
   @override
   void didChangeDependencies() {
-    final args = ModalRoute.of(context)?.settings.arguments;
     super.didChangeDependencies();
-    assert(args != null && args is int, 'Error: arguments must be int');
-    index = args as int;
-    final booksStore = Provider.of<BooksStore>(context, listen: false);
-    final book = booksStore.list[index];
-    if (book.filePath != null && book.filePath!.isNotEmpty) {
-      _epubController = EpubController(
-        document: EpubDocument.openFile(File(book.filePath!)),
-      );
-    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _epubController?.dispose();
+    super.dispose();
   }
 
   void _changeFontSize(int delta) {
@@ -117,6 +127,11 @@ class _BookTextScreenState extends State<BookTextScreen> {
           });
           Navigator.pop(context);
         },
+        fontSize: _fontSize,
+        lineHeight: _lineHeight,
+        fontFamily: _selectedFont,
+        textColor: _textColor,
+        epubBackgroundColor: _backgroundColor,
       ),
     );
   }
@@ -201,9 +216,9 @@ class _BookTextScreenState extends State<BookTextScreen> {
           ),
         ],
       ),
-      body: book.filePath != null && book.filePath!.isNotEmpty
+      body: (book.filePath != null && book.filePath!.isNotEmpty && _epubController != null)
           ? EpubView(
-              controller: _epubController,
+              controller: _epubController!,
             )
           : Center(
               child: Text(

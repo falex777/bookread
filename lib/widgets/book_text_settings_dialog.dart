@@ -10,6 +10,11 @@ class BookTextSettingsDialog extends StatelessWidget {
   final Function(int) onFontSizeChanged;
   final Function(int) onLineHeightChanged;
   final Function(Color, Color) onThemeSelected;
+  final double fontSize;
+  final double lineHeight;
+  final String fontFamily;
+  final Color textColor;
+  final Color epubBackgroundColor;
 
   const BookTextSettingsDialog({
     super.key,
@@ -21,6 +26,11 @@ class BookTextSettingsDialog extends StatelessWidget {
     required this.onFontSizeChanged,
     required this.onLineHeightChanged,
     required this.onThemeSelected,
+    required this.fontSize,
+    required this.lineHeight,
+    required this.fontFamily,
+    required this.textColor,
+    required this.epubBackgroundColor,
   });
 
   @override
