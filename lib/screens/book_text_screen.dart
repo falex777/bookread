@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:read_aloud_front/models/books.model.dart';
 import 'package:read_aloud_front/widgets/book_text_settings_dialog.dart';
+import 'package:epub_view/epub_view.dart';
+import 'dart:io';
 
 class BookTextScreen extends StatefulWidget {
   const BookTextScreen({super.key});
@@ -21,12 +23,15 @@ class _BookTextScreenState extends State<BookTextScreen> {
   Color _backgroundColor = Color(0xFFF5F1E4);
   Color _textColor = Colors.black87;
 
+  late EpubController _epubController;
+
   double get _fontSize => 16.0 * _fontSizePercent / 100;
   double get _lineHeight => _lineHeightPercent / 100;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _epubController.dispose();
     super.dispose();
   }
 
@@ -36,6 +41,13 @@ class _BookTextScreenState extends State<BookTextScreen> {
     super.didChangeDependencies();
     assert(args != null && args is int, 'Error: arguments must be int');
     index = args as int;
+    final booksStore = Provider.of<BooksStore>(context, listen: false);
+    final book = booksStore.list[index];
+    if (book.filePath != null && book.filePath!.isNotEmpty) {
+      _epubController = EpubController(
+        document: EpubDocument.openFile(File(book.filePath!)),
+      );
+    }
   }
 
   void _changeFontSize(int delta) {
@@ -189,19 +201,16 @@ class _BookTextScreenState extends State<BookTextScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          book.booktxt,
-          style: TextStyle(
-            fontSize: _fontSize,
-            color: _textColor,
-            height: _lineHeight,
-            fontFamily: _selectedFont,
-          ),
-          textAlign: TextAlign.justify,
-        ),
-      ),
+      body: book.filePath != null && book.filePath!.isNotEmpty
+          ? EpubView(
+              controller: _epubController,
+            )
+          : Center(
+              child: Text(
+                'Файл книги не найден',
+                style: TextStyle(fontSize: 18, color: Colors.red),
+              ),
+            ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: _backgroundColor,
