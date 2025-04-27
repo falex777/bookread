@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 import 'package:books_reader/models/books.model.dart';
 import 'package:books_reader/widgets/book_card.dart';
 import 'package:books_reader/widgets/book_card_grid.dart';
@@ -58,55 +54,12 @@ class _BookListScreenState extends State<BookListScreen> {
     );
   }
 
-  // Функция для копирования файла в локальное хранилище приложения
-  Future<String> _copyFileToAppStorage(File sourceFile) async {
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final fileName = path.basename(sourceFile.path);
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final uniqueFileName = '${timestamp}_$fileName';
-      final targetPath = path.join(appDir.path, 'books', uniqueFileName);
-      
-      // Создаем директорию, если она не существует
-      final targetDir = Directory(path.dirname(targetPath));
-      if (!await targetDir.exists()) {
-        await targetDir.create(recursive: true);
-      }
-      
-      // Копируем файл
-      final newFile = await sourceFile.copy(targetPath);
-      return newFile.path;
-    } catch (e) {
-      print('Ошибка при копировании файла: $e');
-      return '';
-    }
-  }
-  
-  // Функция для выбора файла книги
-  Future<String> _pickBookFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['txt', 'epub', 'pdf', 'fb2'],
-      );
-      
-      if (result != null && result.files.single.path != null) {
-        // Возвращаем только путь к выбранному файлу, без копирования
-        return result.files.single.path!;
-      }
-    } catch (e) {
-      print('Ошибка при выборе файла: $e');
-    }
-    return '';
-  }
-
   void _editBook(BooksStore bookStore, int index) {
     final book = bookStore.list[index];
     final titleController = TextEditingController(text: book.title);
     final authorController = TextEditingController(text: book.author);
     final bookTxtController = TextEditingController(text: book.booktxt);
     final imgController = TextEditingController(text: book.img);
-    String bookFilePath = book.bookFilePath;
 
     showDialog(
       context: context,
@@ -133,31 +86,6 @@ class _BookListScreenState extends State<BookListScreen> {
                   decoration: const InputDecoration(
                       labelText: 'Изображение (имя файла)'),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        bookFilePath.isEmpty 
-                            ? 'Файл книги не выбран' 
-                            : 'Файл: ${path.basename(bookFilePath)}',
-                        style: TextStyle(fontSize: 14),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        final filePath = await _pickBookFile();
-                        if (filePath.isNotEmpty) {
-                          setState(() {
-                            bookFilePath = filePath;
-                          });
-                        }
-                      },
-                      child: const Text('Выбрать файл'),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -173,19 +101,12 @@ class _BookListScreenState extends State<BookListScreen> {
                     authorController.text.isNotEmpty &&
                     imgController.text.isNotEmpty) {
                   try {
-                    // Копируем файл в хранилище приложения, если был выбран новый файл
-                    String finalBookFilePath = book.bookFilePath;
-                    if (bookFilePath.isNotEmpty && bookFilePath != book.bookFilePath) {
-                      finalBookFilePath = await _copyFileToAppStorage(File(bookFilePath));
-                    }
-                    
                     final updatedBook = BookItem(
                       id: book.id,
                       title: titleController.text,
                       author: authorController.text,
                       booktxt: bookTxtController.text,
                       img: imgController.text,
-                      bookFilePath: finalBookFilePath,
                       progress: book.progress,
                       isFavorite: book.isFavorite,
                     );
@@ -243,7 +164,6 @@ class _BookListScreenState extends State<BookListScreen> {
     final authorController = TextEditingController();
     final bookTxtController = TextEditingController();
     final imgController = TextEditingController();
-    String bookFilePath = '';
 
     showDialog(
       context: context,
@@ -270,31 +190,6 @@ class _BookListScreenState extends State<BookListScreen> {
                   decoration: const InputDecoration(
                       labelText: 'Изображение (имя файла)'),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        /* bookFilePath.isEmpty 
-                            ? 'Файл книги не выбран' 
-                            :  */'Файл: ${path.basename(bookFilePath)}',
-                        style: TextStyle(fontSize: 14),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        final filePath = await _pickBookFile();
-                        if (filePath.isNotEmpty) {
-                          setState(() {
-                            bookFilePath = filePath;
-                          });
-                        }
-                      },
-                      child: const Text('Выбрать файл'),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -310,19 +205,12 @@ class _BookListScreenState extends State<BookListScreen> {
                     authorController.text.isNotEmpty &&
                     imgController.text.isNotEmpty) {
                   try {
-                    // Копируем файл в хранилище приложения только при нажатии кнопки Добавить
-                    String finalBookFilePath = '';
-                    if (bookFilePath.isNotEmpty) {
-                      finalBookFilePath = await _copyFileToAppStorage(File(bookFilePath));
-                    }
-                    
                     final newBook = BookItem(
                       id: id,
                       title: titleController.text,
                       author: authorController.text,
                       booktxt: bookTxtController.text,
                       img: imgController.text,
-                      bookFilePath: finalBookFilePath,
                     );
                     await bookStore.addBook(newBook);
                     Navigator.of(context).pop();
@@ -477,4 +365,4 @@ class _BookListScreenState extends State<BookListScreen> {
       ),
     );
   }
-}
+} 

@@ -6,7 +6,8 @@ import 'package:books_reader/models/books.model.dart';
 import 'package:books_reader/screens/book_text_screen.dart';
 import 'package:books_reader/screens/profile_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
