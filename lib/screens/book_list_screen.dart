@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:books_reader/models/books.model.dart';
-import 'package:books_reader/widgets/book_card.dart';
-import 'package:books_reader/widgets/book_card_grid.dart';
-import 'package:books_reader/widgets/book_action_sheet.dart';
+import 'package:read_aloud_front/models/books.model.dart';
+import 'package:read_aloud_front/widgets/book_card.dart';
+import 'package:read_aloud_front/widgets/book_card_grid.dart';
+import 'package:read_aloud_front/widgets/book_action_sheet.dart';
 
 class BookListScreen extends StatefulWidget {
   const BookListScreen({super.key, required this.title});

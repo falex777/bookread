@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:books_reader/models/books.model.dart';
+import 'package:read_aloud_front/models/books.model.dart';
 
 class BookTextScreen extends StatefulWidget {
   const BookTextScreen({super.key});
