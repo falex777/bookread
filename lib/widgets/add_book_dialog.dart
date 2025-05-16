@@ -17,7 +17,6 @@ class AddBookDialog extends StatefulWidget {
 class _AddBookDialogState extends State<AddBookDialog> {
   final titleController = TextEditingController();
   final authorController = TextEditingController();
-  final bookTxtController = TextEditingController();
   final imgController = TextEditingController();
   String? _pickedFilePath;
   String? _pickedFileName;
@@ -26,7 +25,6 @@ class _AddBookDialogState extends State<AddBookDialog> {
   void dispose() {
     titleController.dispose();
     authorController.dispose();
-    bookTxtController.dispose();
     imgController.dispose();
     super.dispose();
   }
@@ -52,7 +50,8 @@ class _AddBookDialogState extends State<AddBookDialog> {
         await booksDir.create(recursive: true);
       }
       final fileName = p.basename(sourcePath);
-      final targetPath = p.join(booksDir.path, '${DateTime.now().millisecondsSinceEpoch}_$fileName');
+      final targetPath = p.join(
+          booksDir.path, '${DateTime.now().millisecondsSinceEpoch}_$fileName');
       final newFile = await File(sourcePath).copy(targetPath);
       return newFile.path;
     } catch (e) {
@@ -72,7 +71,6 @@ class _AddBookDialogState extends State<AddBookDialog> {
         id: widget.newId,
         title: titleController.text,
         author: authorController.text,
-        booktxt: bookTxtController.text,
         img: imgController.text,
         filePath: savedFilePath,
       );
@@ -80,7 +78,8 @@ class _AddBookDialogState extends State<AddBookDialog> {
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ошибка: все поля должны быть заполнены.')),
+        const SnackBar(
+            content: Text('Ошибка: все поля должны быть заполнены.')),
       );
     }
   }
@@ -101,19 +100,18 @@ class _AddBookDialogState extends State<AddBookDialog> {
               decoration: const InputDecoration(labelText: 'Автор'),
             ),
             TextField(
-              controller: bookTxtController,
-              decoration: const InputDecoration(labelText: 'Текст'),
-            ),
-            TextField(
               controller: imgController,
-              decoration: const InputDecoration(labelText: 'Изображение (имя файла)'),
+              decoration:
+                  const InputDecoration(labelText: 'Изображение (имя файла)'),
             ),
             const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    _pickedFileName != null ? 'Файл: $_pickedFileName' : 'Файл не выбран',
+                    _pickedFileName != null
+                        ? 'Файл: $_pickedFileName'
+                        : 'Файл не выбран',
                     style: const TextStyle(fontSize: 14),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -139,4 +137,4 @@ class _AddBookDialogState extends State<AddBookDialog> {
       ],
     );
   }
-} 
+}

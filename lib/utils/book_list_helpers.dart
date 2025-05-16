@@ -41,7 +41,6 @@ Future<void> showEditBookDialog({
   final book = bookStore.list[index];
   final titleController = TextEditingController(text: book.title);
   final authorController = TextEditingController(text: book.author);
-  final bookTxtController = TextEditingController(text: book.booktxt);
   final imgController = TextEditingController(text: book.img);
 
   await showDialog(
@@ -61,12 +60,9 @@ Future<void> showEditBookDialog({
                 decoration: const InputDecoration(labelText: 'Автор'),
               ),
               TextField(
-                controller: bookTxtController,
-                decoration: const InputDecoration(labelText: 'Текст'),
-              ),
-              TextField(
                 controller: imgController,
-                decoration: const InputDecoration(labelText: 'Изображение (имя файла)'),
+                decoration:
+                    const InputDecoration(labelText: 'Изображение (имя файла)'),
               ),
             ],
           ),
@@ -86,7 +82,6 @@ Future<void> showEditBookDialog({
                   id: book.id,
                   title: titleController.text,
                   author: authorController.text,
-                  booktxt: bookTxtController.text,
                   img: imgController.text,
                   progress: book.progress,
                   isFavorite: book.isFavorite,
@@ -95,7 +90,8 @@ Future<void> showEditBookDialog({
                 Navigator.of(context).pop();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ошибка: все поля должны быть заполнены.')),
+                  const SnackBar(
+                      content: Text('Ошибка: все поля должны быть заполнены.')),
                 );
               }
             },
@@ -145,4 +141,4 @@ Future<void> showAddBookDialog({
       return AddBookDialog(onAdd: onAdd, newId: newId);
     },
   );
-} 
+}

@@ -181,7 +181,8 @@ class _BookTextScreenState extends State<BookTextScreen> {
       _isPlaying = !_isPlaying;
     });
     if (_isPlaying) {
-      await bookStore.playAudio(book.booktxt);
+      await bookStore
+          .playAudio(book.title); // Используем заголовок книги вместо текста
     }
   }
 
@@ -202,8 +203,8 @@ class _BookTextScreenState extends State<BookTextScreen> {
         title: _buildTitle(book.title),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, 
-                      color: _textColor),
+            icon: Icon(_isSearching ? Icons.close : Icons.search,
+                color: _textColor),
             onPressed: _toggleSearch,
           ),
           IconButton(
@@ -216,7 +217,9 @@ class _BookTextScreenState extends State<BookTextScreen> {
           ),
         ],
       ),
-      body: (book.filePath != null && book.filePath!.isNotEmpty && _epubController != null)
+      body: (book.filePath != null &&
+              book.filePath!.isNotEmpty &&
+              _epubController != null)
           ? EpubView(
               controller: _epubController!,
             )
@@ -277,4 +280,4 @@ class _BookTextScreenState extends State<BookTextScreen> {
       ),
     );
   }
-} 
+}

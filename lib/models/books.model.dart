@@ -31,10 +31,11 @@ class BooksStore extends ChangeNotifier {
 
   Future<void> _loadFromFile() async {
     await _initializeLocalPath();
-    
+
     if (!_prefs.containsKey('books')) {
       // If no data exists, load from assets
-      final String jsonString = await rootBundle.loadString('assets/data/books.json');
+      final String jsonString =
+          await rootBundle.loadString('assets/data/books.json');
       await _prefs.setString('books', jsonString);
       return await _loadFromFile();
     }
@@ -43,7 +44,8 @@ class BooksStore extends ChangeNotifier {
       final String jsonString = _prefs.getString('books') ?? '[]';
       List jsonResponse = jsonDecode(jsonString);
       _books.clear();
-      _books.addAll(jsonResponse.map((book) => BookItem.fromJson(book)).toList());
+      _books
+          .addAll(jsonResponse.map((book) => BookItem.fromJson(book)).toList());
       notifyListeners();
     } catch (e) {
       throw Exception('Ошибка загрузки книг: ${e.toString()}');
@@ -142,7 +144,6 @@ class BookItem {
   final int id;
   final String title;
   final String author;
-  final String booktxt;
   final String img;
   final int progress;
   final String? filePath;
@@ -152,7 +153,6 @@ class BookItem {
     required this.id,
     required this.title,
     required this.author,
-    this.booktxt = '',
     this.img = '',
     this.progress = 0,
     this.filePath,
@@ -164,7 +164,6 @@ class BookItem {
       id: json['id'] as int,
       title: json['title'] as String,
       author: json['author'] as String,
-      booktxt: json['booktxt'] as String? ?? '',
       img: json['img'] as String? ?? '',
       progress: json['progress'] as int? ?? 0,
       filePath: json['filePath'] as String?,
@@ -177,7 +176,6 @@ class BookItem {
       'id': id,
       'title': title,
       'author': author,
-      'booktxt': booktxt,
       'img': img,
       'progress': progress,
       'filePath': filePath,
