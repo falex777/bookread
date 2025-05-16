@@ -3,21 +3,21 @@
     "id": 1,
     "title": "Метро 2033",
     "author": "Дмитрий Глуховский",
-    "img": "1.jpg",
+    "img": "no-cover.png",
     "progress": 50
   },
   {
     "id": 2,
     "title": "Дао Toyota",
     "author": "Джеффри Лайкер",
-    "img": "2.jpg",
+    "img": "no-cover.png",
     "progress": 80
   },
   {
     "id": 3,
     "title": "Бойцовский клуб",
     "author": "Чак Паланик",
-    "img": "3.jpg",
+    "img": "no-cover.png",
     "progress": 10
   }
 ]
