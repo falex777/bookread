@@ -1,10 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:epub_view/epub_view.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:image/image.dart' as image;
 
 class BooksStore extends ChangeNotifier {
   final List<BookItem> _books = [];
@@ -93,19 +98,31 @@ class BooksStore extends ChangeNotifier {
       (item) => item.id == id,
       orElse: () => BookItem(id: -1, title: '', author: '', filePath: null),
     );
-    if (book.id != -1 && book.filePath != null && book.filePath!.isNotEmpty) {
-      final file = File(book.filePath!);
-      if (await file.exists()) {
-        try {
-          await file.delete();
-        } catch (e) {
-          // ignore error
+    if (book.id != -1) {
+      if (book.filePath != null && book.filePath!.isNotEmpty) {
+        final file = File(book.filePath!);
+        if (await file.exists()) {
+          try {
+            await file.delete();
+          } catch (e) {
+            // ignore error
+          }
         }
       }
+      if (book.img.isNotEmpty) {
+        final coverFile = File(book.img);
+        if (await coverFile.exists()) {
+          try {
+            await coverFile.delete();
+          } catch (e) {
+            // ignore error
+          }
+        }
+      }
+      _books.removeWhere((item) => item.id == id);
+      await _saveToFile();
+      notifyListeners();
     }
-    _books.removeWhere((item) => item.id == id);
-    await _saveToFile();
-    notifyListeners();
   }
 
   Future<void> updateProfile(UserProfile profile) async {
@@ -136,6 +153,84 @@ class BooksStore extends ChangeNotifier {
       }
     } catch (e) {
       await player.play(AssetSource('demo.mp3'));
+    }
+  }
+
+  /// Анализирует epub файл, извлекает метаданные и добавляет книгу в библиотеку
+  ///
+  /// [epubFilePath] - путь к файлу epub
+  ///
+  /// Возвращает добавленную книгу или null в случае ошибки
+  Future<BookItem?> addBookFromEpub(String epubFilePath) async {
+    try {
+      // Проверяем существование файла
+      final File epubFile = File(epubFilePath);
+      if (!await epubFile.exists()) {
+        throw Exception('Файл не существует: $epubFilePath');
+      }
+
+      // Получаем директорию для хранения книг
+      final appDir = await getApplicationDocumentsDirectory();
+      final booksDir = Directory(p.join(appDir.path, 'books'));
+      if (!await booksDir.exists()) {
+        await booksDir.create(recursive: true);
+      }
+
+      // Создаем директорию для обложек
+      final coversDir = Directory(p.join(appDir.path, 'covers'));
+      if (!await coversDir.exists()) {
+        await coversDir.create(recursive: true);
+      }
+
+      // Генерируем уникальное имя файла
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = p.basename(epubFilePath);
+      final newFilePath = p.join(booksDir.path, '${timestamp}_$fileName');
+
+      // Копируем файл в директорию приложения
+      final savedFile = await epubFile.copy(newFilePath);
+
+      // Открываем epub документ для извлечения метаданных
+      final epubDocument = await EpubDocument.openFile(savedFile);
+
+      // Извлекаем метаданные
+      String title = 'Неизвестная книга';
+      String author = 'Неизвестный автор';
+
+      // Получаем название книги
+      if (epubDocument.Title != null && epubDocument.Title!.isNotEmpty) {
+        title = epubDocument.Title!;
+      }
+
+      // Получаем автора книги
+      if (epubDocument.Author != null && epubDocument.Author!.isNotEmpty) {
+        author = epubDocument.Author!;
+      }
+
+      // Пытаемся получить обложку
+      final coverImage = epubDocument.CoverImage;
+      String coverPath = '';
+      if (coverImage != null) {
+        // Сохраняем обложку, если она есть
+        final coverFileName = '${timestamp}_cover.png';
+        final coverFilePath = p.join(coversDir.path, coverFileName);
+        File(coverFilePath).writeAsBytesSync(image.encodePng(coverImage));
+        coverPath = coverFilePath;
+      }
+
+      // Создаем и добавляем новую книгу
+      final newBook = BookItem(
+        id: maxCode() + 1,
+        title: title,
+        author: author,
+        img: coverPath,
+        filePath: savedFile.path,
+      );
+
+      await addBook(newBook);
+      return newBook;
+    } catch (e) {
+      throw Exception('Ошибка при добавлении книги из epub: ${e.toString()}');
     }
   }
 }
