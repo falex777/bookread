@@ -89,6 +89,7 @@ class BooksStore extends ChangeNotifier {
     if (index != -1) {
       _books[index].author = updBook.author;
       _books[index].title = updBook.title;
+      if (_books[index].title.isEmpty) _books[index].img = updBook.img;
       await _saveToFile();
       notifyListeners();
     }
@@ -240,7 +241,7 @@ class BookItem {
   final int id;
   String title;
   String author;
-  final String img;
+  String img;
   int progress;
   final String? filePath;
   bool isFavorite;
