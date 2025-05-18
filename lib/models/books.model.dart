@@ -87,7 +87,8 @@ class BooksStore extends ChangeNotifier {
   Future<void> updateBook(BookItem updBook) async {
     int index = _books.indexWhere((item) => item.id == updBook.id);
     if (index != -1) {
-      _books[index] = updBook;
+      _books[index].author = updBook.author;
+      _books[index].title = updBook.title;
       await _saveToFile();
       notifyListeners();
     }
@@ -237,10 +238,10 @@ class BooksStore extends ChangeNotifier {
 
 class BookItem {
   final int id;
-  final String title;
-  final String author;
+  String title;
+  String author;
   final String img;
-  final int progress;
+  int progress;
   final String? filePath;
   bool isFavorite;
 

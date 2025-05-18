@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:read_aloud_front/models/books.model.dart';
 import 'package:read_aloud_front/widgets/book_action_sheet.dart';
-import 'package:read_aloud_front/widgets/add_book_dialog.dart';
 
 Future<void> showBookActions({
   required BuildContext context,
@@ -52,18 +51,18 @@ Future<void> showEditBookDialog({
           child: Column(
             children: [
               TextField(
+                controller: imgController,
+                decoration:
+                    const InputDecoration(labelText: 'Изображение (имя файла)'),
+              ),
+              TextField(
                 controller: titleController,
                 decoration: const InputDecoration(labelText: 'Название'),
               ),
               TextField(
                 controller: authorController,
                 decoration: const InputDecoration(labelText: 'Автор'),
-              ),
-              TextField(
-                controller: imgController,
-                decoration:
-                    const InputDecoration(labelText: 'Изображение (имя файла)'),
-              ),
+              )
             ],
           ),
         ),
@@ -76,16 +75,12 @@ Future<void> showEditBookDialog({
             child: const Text('Сохранить'),
             onPressed: () async {
               if (titleController.text.isNotEmpty &&
-                  authorController.text.isNotEmpty &&
-                  imgController.text.isNotEmpty) {
+                  authorController.text.isNotEmpty) {
                 final updatedBook = BookItem(
-                  id: book.id,
-                  title: titleController.text,
-                  author: authorController.text,
-                  img: imgController.text,
-                  progress: book.progress,
-                  isFavorite: book.isFavorite,
-                );
+                    id: book.id,
+                    title: titleController.text,
+                    author: authorController.text,
+                    img: imgController.text);
                 onSave(updatedBook);
                 Navigator.of(context).pop();
               } else {
@@ -126,19 +121,6 @@ Future<void> showDeleteBookDialog({
           ),
         ],
       );
-    },
-  );
-}
-
-Future<void> showAddBookDialog({
-  required BuildContext context,
-  required void Function(BookItem) onAdd,
-  required int newId,
-}) async {
-  await showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AddBookDialog(onAdd: onAdd, newId: newId);
     },
   );
 }
