@@ -264,7 +264,39 @@ class _BookTextScreenState extends State<BookTextScreen> {
                   color: Colors.black12,
                 ),
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (_epubController != null) {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(16)),
+                        ),
+                        isScrollControlled: true,
+                        builder: (context) => SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          child: EpubViewTableOfContents(
+                              controller: _epubController!,
+                              itemBuilder: (context, index, chapter,
+                                      itemCount) =>
+                                  ListTile(
+                                    title: Text(
+                                        chapter.title ?? 'Нет заголовка',
+                                        style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 14)),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      final cfi =
+                                          _epubController?.generateEpubCfi();
+                                      _epubController?.gotoEpubCfi(cfi ?? '');
+                                    },
+                                  )),
+                        ),
+                      );
+                    }
+                  },
                   icon: Icon(
                     Icons.list,
                     color: Colors.black54,
