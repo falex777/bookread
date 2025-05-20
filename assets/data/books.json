@@ -1,23 +1,9 @@
 [
   {
     "id": 1,
-    "title": "Метро 2033",
-    "author": "Дмитрий Глуховский",
-    "img": "no-cover.png",
+    "title": "Добавьтье книгу, нажав +",
+    "author": "ТЕСТ",
+    "img": "",
     "progress": 50
-  },
-  {
-    "id": 2,
-    "title": "Дао Toyota",
-    "author": "Джеффри Лайкер",
-    "img": "no-cover.png",
-    "progress": 80
-  },
-  {
-    "id": 3,
-    "title": "Бойцовский клуб",
-    "author": "Чак Паланик",
-    "img": "no-cover.png",
-    "progress": 10
   }
 ]
