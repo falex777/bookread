@@ -177,13 +177,14 @@ class _BookTextScreenState extends State<BookTextScreen> {
   }
 
   void _togglePlay(BooksStore bookStore, BookItem book) async {
+    if (_isPlaying) {
+      await bookStore.stopAudio();
+    } else {
+      await bookStore.playAudio(book.title);
+    }
     setState(() {
       _isPlaying = !_isPlaying;
     });
-    if (_isPlaying) {
-      await bookStore
-          .playAudio(book.title); // Используем заголовок книги вместо текста
-    }
   }
 
   @override

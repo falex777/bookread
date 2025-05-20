@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -17,6 +16,9 @@ class BooksStore extends ChangeNotifier {
   UserProfile _userProfile = UserProfile();
   late SharedPreferences _prefs;
   bool _isInitialized = false;
+
+  final AudioPlayer _player = AudioPlayer();
+  bool _isPlaying = false;
 
   List<BookItem> get list => _books;
   UserProfile get userProfile => _userProfile;
@@ -133,7 +135,6 @@ class BooksStore extends ChangeNotifier {
   }
 
   Future<void> playAudio(String txt) async {
-    final player = AudioPlayer();
     try {
       final response = await http.post(
         Uri.parse('${baseUrl}getaudio'),
@@ -146,15 +147,24 @@ class BooksStore extends ChangeNotifier {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         List jsonResponse = json.decode(response.body);
         if (jsonResponse.isNotEmpty) {
-          await player.play(UrlSource(baseUrl + jsonResponse[0]));
+          await _player.play(UrlSource(baseUrl + jsonResponse[0]));
         } else {
-          await player.play(AssetSource('demo.mp3'));
+          await _player.play(AssetSource('demo.mp3'));
         }
       } else {
-        await player.play(AssetSource('demo.mp3'));
+        await _player.play(AssetSource('demo.mp3'));
       }
+      _isPlaying = true;
     } catch (e) {
-      await player.play(AssetSource('demo.mp3'));
+      await _player.play(AssetSource('demo.mp3'));
+      _isPlaying = true;
+    }
+  }
+
+  Future<void> stopAudio() async {
+    if (_isPlaying) {
+      await _player.stop();
+      _isPlaying = false;
     }
   }
 
