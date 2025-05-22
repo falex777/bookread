@@ -296,11 +296,15 @@ class UserProfile {
   String name;
   String surname;
   String email;
+  String password;
+  String subscribeCode;
 
   UserProfile({
     this.uid = 0,
     this.name = '',
     this.surname = '',
     this.email = '',
+    this.password = '',
+    this.subscribeCode = '',
   });
 }
