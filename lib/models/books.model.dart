@@ -248,8 +248,14 @@ class BooksStore extends ChangeNotifier {
         RegExp(r'<p[^>]*>(.*?)<\/p>', caseSensitive: false, multiLine: true);
     final tagRegExp = RegExp(r'<[^>]+>');
     for (final chapter in chapters!) {
-      final html = chapter.HtmlContent ?? '';
-      final matches = paragraphRegExp.allMatches(html);
+      final html = chapter.HtmlContent ?? '';      
+      final matches = paragraphRegExp
+        .allMatches(html
+          .replaceAll('<div', '<p')
+          .replaceAll('<h1 ', '<p')
+          .replaceAll('</div>', '</p>')
+          .replaceAll('</h1>', '</h1>')
+        );
       for (final match in matches) {
         String paragraph =
             match.group(1)?.replaceAll(tagRegExp, '').trim() ?? '';
