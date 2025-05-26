@@ -4,6 +4,7 @@ import 'package:read_aloud_front/models/books.model.dart';
 import 'package:read_aloud_front/widgets/book_text_settings_dialog.dart';
 import 'package:epub_view/epub_view.dart';
 import 'dart:io';
+import 'package:read_aloud_front/widgets/voice_settings_dialog.dart';
 
 class BookTextScreen extends StatefulWidget {
   const BookTextScreen({super.key});
@@ -136,43 +137,16 @@ class _BookTextScreenState extends State<BookTextScreen> {
     );
   }
 
-  void _showVoiceSettings() {
+  Future<void> _showVoiceSettings() async {
+    final booksStore = Provider.of<BooksStore>(context, listen: false);
+    await booksStore.fetchTtsLanguagesAndVoices();
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Настройки озвучки',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 16),
-            ListTile(
-              title: Text('Скорость речи'),
-              trailing: DropdownButton<String>(
-                value: 'Нормальная',
-                items: ['Медленная', 'Нормальная', 'Быстрая']
-                    .map((String value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ))
-                    .toList(),
-                onChanged: (_) {},
-              ),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) => const VoiceSettingsDialog(),
     );
   }
 
