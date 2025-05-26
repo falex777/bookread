@@ -239,6 +239,28 @@ class BooksStore extends ChangeNotifier {
     }
   }
 
+  Future<List<String>> getBookText(String epubFilePath) async {
+    final File epubFile = File(epubFilePath);
+    final document = await EpubDocument.openFile(epubFile);
+    final chapters = document.Chapters;
+    List<String> paragraphs = [];
+    final paragraphRegExp =
+        RegExp(r'<p[^>]*>(.*?)<\/p>', caseSensitive: false, multiLine: true);
+    final tagRegExp = RegExp(r'<[^>]+>');
+    for (final chapter in chapters!) {
+      final html = chapter.HtmlContent ?? '';
+      final matches = paragraphRegExp.allMatches(html);
+      for (final match in matches) {
+        String paragraph =
+            match.group(1)?.replaceAll(tagRegExp, '').trim() ?? '';
+        if (paragraph.isNotEmpty) {
+          paragraphs.add(paragraph);
+        }
+      }
+    }
+    return paragraphs;
+  }
+
   /// Authenticates user with external API and updates profile information
   /// Returns true if authentication was successful
   Future<bool> authenticate(String email, String password) async {

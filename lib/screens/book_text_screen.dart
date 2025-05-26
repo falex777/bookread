@@ -29,6 +29,8 @@ class _BookTextScreenState extends State<BookTextScreen> {
   double get _fontSize => 16.0 * _fontSizePercent / 100;
   double get _lineHeight => _lineHeightPercent / 100;
 
+  bool shouldStop = true;
+
   @override
   void initState() {
     super.initState();
@@ -150,10 +152,23 @@ class _BookTextScreenState extends State<BookTextScreen> {
   }
 
   void _togglePlay(BooksStore bookStore, BookItem book) async {
-    if (bookStore.isPlaying) {
+    if (bookStore.isPlaying && shouldStop == false) {
+      shouldStop = true;
       await bookStore.stopAudio();
-    } else {
-      await bookStore.playAudio(book.title);
+      return;
+    }
+
+    shouldStop = false;
+    final paragraphs = await bookStore.getBookText(book.filePath ?? '');
+    for (final paragraph in paragraphs) {
+      if (!mounted || shouldStop) break;
+      await bookStore.playAudio(paragraph);
+      while (bookStore.isPlaying) {
+        await Future.delayed(Duration(milliseconds: 200));
+        if (!mounted && shouldStop) {
+          break;
+        }
+      }
     }
   }
 
@@ -220,7 +235,7 @@ class _BookTextScreenState extends State<BookTextScreen> {
                 TextButton.icon(
                   onPressed: () => _togglePlay(booksStore, book),
                   icon: Icon(
-                    booksStore.isPlaying ? Icons.pause : Icons.play_arrow,
+                    shouldStop == false ? Icons.pause : Icons.play_arrow,
                     color: Colors.green,
                   ),
                   label: Text(
