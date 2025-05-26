@@ -16,7 +16,6 @@ class BookTextScreen extends StatefulWidget {
 class _BookTextScreenState extends State<BookTextScreen> {
   int index = 0;
   bool _isSearching = false;
-  bool _isPlaying = false;
   final TextEditingController _searchController = TextEditingController();
   int _fontSizePercent = 100;
   int _lineHeightPercent = 100;
@@ -151,14 +150,11 @@ class _BookTextScreenState extends State<BookTextScreen> {
   }
 
   void _togglePlay(BooksStore bookStore, BookItem book) async {
-    if (_isPlaying) {
+    if (bookStore.isPlaying) {
       await bookStore.stopAudio();
     } else {
       await bookStore.playAudio(book.title);
     }
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
   }
 
   @override
@@ -224,7 +220,7 @@ class _BookTextScreenState extends State<BookTextScreen> {
                 TextButton.icon(
                   onPressed: () => _togglePlay(booksStore, book),
                   icon: Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    booksStore.isPlaying ? Icons.pause : Icons.play_arrow,
                     color: Colors.green,
                   ),
                   label: Text(

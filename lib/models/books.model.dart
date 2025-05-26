@@ -20,6 +20,7 @@ class BooksStore extends ChangeNotifier {
 
   final AudioPlayer _player = AudioPlayer();
   bool _isPlaying = false;
+  bool get isPlaying => _isPlaying;
   final FlutterTts _flutterTts = FlutterTts();
   List<BookItem> get list => _books;
   UserProfile get profile => _profile;
@@ -156,6 +157,7 @@ class BooksStore extends ChangeNotifier {
     if (_isPlaying) {
       await _flutterTts.stop();
       _isPlaying = false;
+      notifyListeners();
     }
   }
 
