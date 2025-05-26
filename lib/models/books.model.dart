@@ -244,21 +244,17 @@ class BooksStore extends ChangeNotifier {
     final document = await EpubDocument.openFile(epubFile);
     final chapters = document.Chapters;
     List<String> paragraphs = [];
-    final paragraphRegExp =
-        RegExp(r'<p[^>]*>(.*?)<\/p>', caseSensitive: false, multiLine: true);
+    final paragraphRegExp = RegExp(
+        r'<(p|div|h1|h2)[^>]*>(.*?)<\/(p|div|h1|h2)>',
+        caseSensitive: false,
+        multiLine: true);
     final tagRegExp = RegExp(r'<[^>]+>');
     for (final chapter in chapters!) {
-      final html = chapter.HtmlContent ?? '';      
-      final matches = paragraphRegExp
-        .allMatches(html
-          .replaceAll('<div', '<p')
-          .replaceAll('<h1 ', '<p')
-          .replaceAll('</div>', '</p>')
-          .replaceAll('</h1>', '</h1>')
-        );
+      final html = chapter.HtmlContent ?? '';
+      final matches = paragraphRegExp.allMatches(html);
       for (final match in matches) {
         String paragraph =
-            match.group(1)?.replaceAll(tagRegExp, '').trim() ?? '';
+            match.group(2)?.replaceAll(tagRegExp, '').trim() ?? '';
         if (paragraph.isNotEmpty) {
           paragraphs.add(paragraph);
         }
